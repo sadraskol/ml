@@ -1,6 +1,6 @@
 gtest_dir = deps/gtest-1.7.0
 cppflags = -isystem $(gtest_dir)/include
-cxxflags = -g -Wall -Wextra -pthread
+cxxflags = -g -Wall -Wextra -pthread -std=c++11
 gtest_headers = $(gtest_dir)/include/gtest/*.h \
 				$(gtest_dir)/include/gtest/internal/*.h
 build_dir=build
