@@ -7,6 +7,9 @@
 
 #include "Network.h"
 
+using neurons::Matrix;
+using neurons::Network;
+
 Network::Network(const std::vector<std::size_t>& sizes) {
     this->num_layers = sizes.size();
     this->sizes = sizes;
@@ -26,5 +29,16 @@ Network::Network(const std::vector<std::size_t>& sizes) {
         Matrix *element = new Matrix(sizes[left], sizes[right], gaussian_random_generator);
         this->weights.push_back(element);
     }
+}
+
+const Matrix Network::feed_forward(const Matrix& input) const {
+    //for b, w in zip(self.biases, self.weights):
+    //   a = sigmoid_vec(np.dot(w, a)+b)
+    //   return a
+    Matrix result = input;
+    for (std::size_t index; index < this->weights.size(); index++) {
+        result = (this->weights[index]->product(input) + (*this->biases[index])).sigmoid();
+    }
+    return result;
 }
 

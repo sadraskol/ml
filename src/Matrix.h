@@ -15,7 +15,7 @@
 
 namespace neurons {
 
-class Matrix {
+    class Matrix {
     public:
         explicit Matrix(const std::size_t& rows, const std::size_t& cols, const std::vector<double>& _data);
 
@@ -28,6 +28,9 @@ class Matrix {
         const Matrix product(const Matrix& right) const;
         const Matrix toExp() const;
         const Matrix sigmoid() const;
+
+        std::size_t getRows() const { return this->rows; }
+        std::size_t getCols() const { return this->cols; }
 
         double get(const std::size_t& x, const std::size_t& y) const;
 
@@ -52,7 +55,6 @@ class Matrix {
             });
         }
 
-
         const std::string toString() const;
 
     private:
@@ -61,7 +63,7 @@ class Matrix {
         std::size_t rows;
         std::size_t cols;
         std::vector<double> data;
-};
+    };
 
 }
 
