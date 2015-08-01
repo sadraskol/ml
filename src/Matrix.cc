@@ -6,6 +6,9 @@
  */
 
 #include "Matrix.h"
+#include <cmath>
+
+using neurons::Matrix;
 
 Matrix::Matrix(const std::size_t& rows, const std::size_t& cols,
 		const std::vector<double>& _data) {
@@ -17,13 +20,13 @@ Matrix::Matrix(const std::size_t& rows, const std::size_t& cols,
 	this->data = _data;
 }
 
-Matrix::Matrix(const std::size_t& rows, const std::size_t& cols, const std::function<double(std::size_t, std::size_t)>& filler) {
+Matrix::Matrix(const std::size_t& rows, const std::size_t& cols, const std::function<double()>& filler) {
 	this->rows = rows;
 	this->cols = cols;
 	this->data = std::vector<double>(rows * cols);
 	for (std::size_t i = 0; i < rows; i++) {
 		for (std::size_t j = 0; j < cols; j++) {
-			this->data[i * cols + j] = filler(i, j);
+			this->data[i * cols + j] = filler();
 		}
 	}
 }
@@ -43,14 +46,10 @@ const std::string Matrix::toString() const {
 	return result;
 }
 
-const Matrix Matrix::multiply(const double& alpha) const {
-    std::vector<double> new_data(this->rows * this->cols);
-    for (std::size_t i = 0; i < this->rows; i++) {
-        for (std::size_t j = 0; j < this->cols; j++) {
-            new_data[i * this->cols + j] = alpha * get(i, j);
-        }
-    }
-    return Matrix(this->rows, this->cols, new_data);
+const Matrix Matrix::operator*(const double& alpha) const {
+    return this->transform([alpha](const double& input) {
+        return alpha * input;
+    });
 }
 
 const Matrix Matrix::product(const Matrix& right) const {
@@ -74,7 +73,7 @@ double Matrix::get(const std::size_t& x, const std::size_t& y) const {
     return this->data[x * this->cols + y];
 }
 
-const Matrix Matrix::operator +(const Matrix& other) const {
+const Matrix Matrix::operator+(const Matrix& other) const {
     std::vector<double> new_data(this->rows * this->cols);
     for (std::size_t i = 0; i < new_data.size(); i++) {
         new_data[i] = this->data[i] + other.data[i];
@@ -82,6 +81,49 @@ const Matrix Matrix::operator +(const Matrix& other) const {
     return Matrix(this->rows, this->cols, new_data);
 }
 
+const Matrix Matrix::operator-() const {
+    return this->transform([](const double &input) {
+        return -input;
+    });
+}
+
+const Matrix Matrix::operator-(const Matrix& other) const {
+    std::vector<double> new_data(this->rows * this->cols);
+    for (std::size_t i = 0; i < new_data.size(); i++) {
+        new_data[i] = this->data[i] - other.data[i];
+    }
+    return Matrix(this->rows, this->cols, new_data);
+}
+
+const Matrix Matrix::operator/(const double& divisor) const {
+    if (divisor == 0) {
+        throw std::invalid_argument("can not divid by zero");
+    }
+    return this->transform([divisor](const double &input) {
+        return input / divisor;
+    });
+}
+
 void Matrix::set(const std::size_t& i, const std::size_t& j, const double& value) {
 	this->data[i * this->cols + j] = value;
+}
+
+const Matrix Matrix::toExp() const {
+    return this->transform([](const double& input) {
+        return exp(input);
+    });
+}
+
+const Matrix Matrix::sigmoid() const {
+    return 1 / ( 1 + (-(*this)).toExp());
+}
+
+const Matrix Matrix::transform(const std::function<double(double)>& transformer) const {
+    std::vector<double> new_data(this->rows * this->cols);
+    for (std::size_t i = 0; i < this->rows; i++) {
+        for (std::size_t j = 0; j < this->cols; j++) {
+            new_data[i * this->cols + j] = transformer(this->get(i, j));
+        }
+    }
+    return Matrix(this->rows, this->cols, new_data);
 }
