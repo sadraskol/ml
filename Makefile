@@ -9,8 +9,10 @@ src_dir=src
 test_dir=test
 tests=$(bin_dir)/Matrix_test
 
-build: main.cc
-	g++ -o /run main.cc
+all: $(bin_dir)/run
+
+$(bin_dir)/run: main.cc $(build_dir)/Matrix.o $(build_dir)/Network.o
+	$(CXX) $(cppflags) $(cxxflags) -lpthread $^ -o $@
 
 test: $(bin_dir)/Matrix_test
 	./$^
@@ -22,6 +24,9 @@ clean:
 
 $(build_dir)/Matrix.o: $(src_dir)/Matrix.h $(src_dir)/Matrix.cc $(gtest_headers)
 	$(CXX) $(cppflags) $(cxxflags) -c $(src_dir)/Matrix.cc -o $@
+
+$(build_dir)/Network.o: $(src_dir)/Network.h $(src_dir)/Network.cc $(gtest_headers)
+	$(CXX) $(cppflags) $(cxxflags) -c $(src_dir)/Network.cc -o $@
 
 ## Tests ##
 ## Tests files ## 
