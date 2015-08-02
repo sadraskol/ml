@@ -56,6 +56,7 @@ namespace neurons {
         }
 
         const std::string toString() const;
+        const std::string toPgm() const;
 
     private:
         void set(const std::size_t& i, const std::size_t& j, const double& value);

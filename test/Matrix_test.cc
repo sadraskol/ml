@@ -103,3 +103,7 @@ TEST(MatrixTest, ScalarMultiplication) {
     }
 }
 
+TEST(MatrixTest, toGrayScaleImage) {
+    const Matrix image(3, 2, std::vector<double> { 0, 0, 0, 0, 3, 255 });
+    ASSERT_STREQ("P2\n3 2\n255\n0 0 \n0 0 \n3 255 \n", image.toPgm().c_str());
+}

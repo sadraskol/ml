@@ -7,6 +7,7 @@
 
 #include "Matrix.h"
 #include <cmath>
+#include <sstream>
 
 using neurons::Matrix;
 
@@ -44,6 +45,18 @@ const std::string Matrix::toString() const {
 	}
 	result += " ]";
 	return result;
+}
+
+const std::string Matrix::toPgm() const {
+    std::ostringstream os;
+	os << "P2\n" << this->rows << " " <<  this->cols << "\n255\n";
+	for (std::size_t i = 0; i < rows; i++) {
+		for (std::size_t j = 0; j < cols; j++) {
+			os << std::to_string((int) get(i, j)) << " ";
+		}
+        os << "\n";
+	}
+	return os.str();
 }
 
 const Matrix Matrix::operator*(const double& alpha) const {

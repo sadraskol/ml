@@ -26,7 +26,7 @@ namespace neurons {
         }
 
         const Matrix feed_forward(const Matrix& input) const;
-        const Matrix SGD(training_data, epochs, mini_batch_size, eta, test_data) const;
+        // TODO const Matrix SGD(training_data, epochs, mini_batch_size, eta, test_data) const;
 
     private:
         std::size_t num_layers;
