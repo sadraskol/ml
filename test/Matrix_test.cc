@@ -1,5 +1,5 @@
 /*
- * Matrix_test.cpp
+ * Matrix_test.cc
  *
  *  Created on: 30 juil. 2015
  *      Author: thomas

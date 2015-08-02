@@ -11,6 +11,7 @@
 #include <vector>
 #include <algorithm>
 #include <functional>
+#include <utility>
 #include "Matrix.h"
 
 namespace neurons {
@@ -18,13 +19,14 @@ namespace neurons {
     public:
         explicit Network(const std::vector<std::size_t>& sizes);
 
-        const Matrix feed_forward(const Matrix& input) const;
-
         virtual ~Network() {
             this->sizes.clear();
             this->biases.clear();
             this->weights.clear();
         }
+
+        const Matrix feed_forward(const Matrix& input) const;
+        const Matrix SGD(training_data, epochs, mini_batch_size, eta, test_data) const;
 
     private:
         std::size_t num_layers;

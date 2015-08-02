@@ -42,3 +42,15 @@ const Matrix Network::feed_forward(const Matrix& input) const {
     return result;
 }
 
+const Matrix Network::SDG(std::vector<std::pair<double, double>>& training_data, const std::size_t& epochs, const std::size_t& mini_batch_size, double eta, std::vector<std::pair<double, double>>& test_data = NULL) const {
+    const std::size_t n = training_data.size();
+    for (std::size_t j = 0; j < epochs; j++) {
+        std::random_shuffle(training_data.begin(), training_data.end());
+        for (std::size_t k = 0; k < n; k += mini_batch_size) {
+            mini_batches = [];
+        }
+        for (auto mini_batch: mini_batches) {
+            this->update_mini_batch(mini_batch, eta);
+        }
+    }
+}
