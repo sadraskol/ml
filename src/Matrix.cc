@@ -83,6 +83,9 @@ const Matrix Matrix::product(const Matrix& right) const {
 }
 
 double Matrix::get(const std::size_t& x, const std::size_t& y) const {
+    if ((int) x < 0 || x >= this->rows || (int) y < 0 || y >= this->cols) {
+        throw std::invalid_argument("Out of Bound get");
+    }
     return this->data[x * this->cols + y];
 }
 

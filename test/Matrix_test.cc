@@ -19,6 +19,22 @@ TEST(MatrixTest, ShouldNotAcceptUnsufficientData) {
     }
 }
 
+void no_out_of_bound_allowed(const Matrix& matrix, const int& i, const int& j) {
+    try {
+        matrix.get(i, j);
+        FAIL() << "matrix should not allow out of bound gets on " << i << ", " << j;
+    } catch (std::exception& e) {}
+}
+TEST(MatrixTest, ShouldNotGetOutOfBoundPositions) {
+	Matrix matrix(2, 3, std::vector<double> { 0, 0, 0, 0, 0, 0 });
+    no_out_of_bound_allowed(matrix, -1, 0);
+    no_out_of_bound_allowed(matrix, -1, -1);
+    no_out_of_bound_allowed(matrix, 0, -1);
+    no_out_of_bound_allowed(matrix, 3, 3);
+    no_out_of_bound_allowed(matrix, 0, 3);
+    no_out_of_bound_allowed(matrix, 2, 0);
+}
+
 TEST(MatrixTest, ToStringWhenInitializing) {
 	Matrix matrix(2, 3, std::vector<double> { 0, 0, 0, 0, 0, 0 });
 	EXPECT_STREQ("[ 0 0 0\n  0 0 0 ]", matrix.toString().c_str());

@@ -15,7 +15,7 @@ all : $(bin_dir)/run
 $(bin_dir)/run : main.cc $(build_dir)/Matrix.o $(build_dir)/Network.o
 	$(CXX) $(cppflags) $(cxxflags) -lpthread $^ -o $@
 
-test : $(bin_dir)/Matrix_test $(bin_dir)/MnistParser_test
+test : $(tests)
 
 clean :
 	rm -f *.o *.a $(tests)
