@@ -28,3 +28,9 @@ int main() {
     return 0;
 }
 
+/* int main() {
+    MnistData training_data(0, 50000);
+    MnistData test_data(50000, 60000);
+    Network network([784, 30, 10]);
+    network.SGD(training_data, 30, 10, 3.0, test_data);
+} */

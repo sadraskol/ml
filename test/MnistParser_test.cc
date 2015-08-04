@@ -12,6 +12,7 @@
 
 using neurons::MnistLabelParser;
 using neurons::MnistImageParser;
+using neurons::MnistData;
 
 TEST(MnistLabelParser, shouldReturnTheFirstNumbersCorrectly) {
     MnistLabelParser parser("data/train-labels-idx1-ubyte");
@@ -57,5 +58,13 @@ TEST(MnistImageParser, shouldNotPermitReadOnNonExistingIndex) {
         parser.getImage(60001);
         FAIL() << "Should be out of bound";
     } catch (std::exception& e) {}
+}
+
+TEST(MnistData, shouldContainsTheSampleAskedFor) {
+    MnistData data(3, 50000);
+    ASSERT_EQ(1, data.getLabel(0));
+    MnistImageParser parser("data/train-images-idx3-ubyte");
+    ASSERT_EQ(parser.getImage(3), data.getImage(0));
+    ASSERT_EQ(49997, data.length());
 }
 

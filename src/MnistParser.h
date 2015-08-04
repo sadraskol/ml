@@ -64,6 +64,30 @@ namespace neurons {
         }
         std::string file_location;
     };
+
+    class MnistData {
+    public:
+        MnistData(const std::size_t& lower_bound, const std::size_t& upped_bound): min(lower_bound), max(upped_bound) {}
+
+        virtual ~MnistData() {}
+
+        int getLabel(const std::size_t& index) const {
+            return labels.getLabel(this->min + index);
+        }
+
+        const std::vector<unsigned char> getImage(std::size_t index) const {
+            return images.getImage(this->min + index);
+        }
+
+        int length() const {
+            return this->max - this->min;
+        }
+
+    private:
+        std::size_t min, max;
+        MnistLabelParser labels = MnistLabelParser("data/train-labels-idx1-ubyte");
+        MnistImageParser images = MnistImageParser("data/train-images-idx3-ubyte");
+    };
 } /* namespace neurons */
 
 #endif /* MNISTPARSER_H_ */
