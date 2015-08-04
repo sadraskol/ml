@@ -65,6 +65,14 @@ const Matrix Matrix::operator*(const double& alpha) const {
     });
 }
 
+const Matrix Matrix::operator*(const Matrix& other) const {
+    std::vector<double> new_data(this->rows * this->cols);
+    for (std::size_t i = 0; i < new_data.size(); i++) {
+        new_data[i] = this->data[i] * other.data[i];
+    }
+    return Matrix(this->rows, this->cols, new_data);
+}
+
 const Matrix Matrix::product(const Matrix& right) const {
     if (this->cols != right.rows) {
         throw std::invalid_argument("size should match");
@@ -134,6 +142,10 @@ const Matrix Matrix::sigmoid() const {
     return 1 / ( 1 + (-(*this)).toExp());
 }
 
+const Matrix Matrix::sigmoid_prime() const {
+    return this->sigmoid() * (1 - this->sigmoid());
+}
+
 const Matrix Matrix::transform(const std::function<double(double)>& transformer) const {
     std::vector<double> new_data(this->rows * this->cols);
     for (std::size_t i = 0; i < this->rows; i++) {
@@ -142,4 +154,18 @@ const Matrix Matrix::transform(const std::function<double(double)>& transformer)
         }
     }
     return Matrix(this->rows, this->cols, new_data);
+}
+
+const Matrix Matrix::transpose() const {
+    Matrix transposed(this->cols, this->rows, []() {return 0;});
+    for (std::size_t i = 0; i < this->rows; i++) {
+        for (std::size_t j = 0; j < this->cols; j++) {
+            transposed.set(j, i, this->get(i, j));
+        }
+    }
+    return transposed;
+}
+
+const Matrix neurons::zeros(const std::size_t& rows, const std::size_t& cols) {
+    return Matrix(rows, cols, []() {return 0;});
 }

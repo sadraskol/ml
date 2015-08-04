@@ -123,3 +123,14 @@ TEST(MatrixTest, toGrayScaleImage) {
     const Matrix image(3, 2, std::vector<double> { 0, 0, 0, 0, 3, 255 });
     ASSERT_STREQ("P2\n3 2\n255\n0 0 \n0 0 \n3 255 \n", image.toPgm().c_str());
 }
+
+TEST(MatrixTest, zeros) {
+    const Matrix matrix = neurons::zeros(3, 4);
+    ASSERT_STREQ("[ 0 0 0 0\n  0 0 0 0\n  0 0 0 0 ]", matrix.toString().c_str());
+}
+
+TEST(MatrixTest, transpose) {
+	Matrix matrix(2, 3, std::vector<double> { 0, 1, 0, 0, 1, 0 });
+	ASSERT_STREQ("[ 0 0\n  1 1\n  0 0 ]", matrix.transpose().toString().c_str());
+}
+

@@ -10,6 +10,8 @@
 
 #include <string>
 #include <vector>
+#include <utility>
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
@@ -67,7 +69,12 @@ namespace neurons {
 
     class MnistData {
     public:
-        MnistData(const std::size_t& lower_bound, const std::size_t& upped_bound): min(lower_bound), max(upped_bound) {}
+        MnistData(const std::size_t& lower_bound, const std::size_t& upped_bound): min(lower_bound), max(upped_bound) {
+            this->data = std::vector<std::pair<int, std::vector<unsigned char>>>(0);
+            for (std::size_t i = 0; i < this->size(); i++) {
+                this->data.push_back(std::make_pair(this->getLabel(i), this->getImage(i)));
+            }
+        }
 
         virtual ~MnistData() {}
 
@@ -79,15 +86,23 @@ namespace neurons {
             return images.getImage(this->min + index);
         }
 
-        int length() const {
+        std::size_t size() const {
             return this->max - this->min;
         }
 
+        const std::vector<std::pair<int, std::vector<unsigned char>>> randomize() const {
+            std::vector<std::pair<int, std::vector<unsigned char>>> copy = this->data;
+            std::random_shuffle(copy.begin(), copy.end());
+            return copy;
+        };
+
     private:
+        std::vector<std::pair<int, std::vector<unsigned char>>> data;
         std::size_t min, max;
         MnistLabelParser labels = MnistLabelParser("data/train-labels-idx1-ubyte");
         MnistImageParser images = MnistImageParser("data/train-images-idx3-ubyte");
     };
+
 } /* namespace neurons */
 
 #endif /* MNISTPARSER_H_ */

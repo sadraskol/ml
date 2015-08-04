@@ -13,11 +13,12 @@
 #include <functional>
 #include <utility>
 #include "Matrix.h"
+#include "MnistParser.h"
 
 namespace neurons {
     class Network {
     public:
-        explicit Network(const std::vector<std::size_t>& sizes);
+        Network(const std::vector<std::size_t>& sizes);
 
         virtual ~Network() {
             this->sizes.clear();
@@ -26,13 +27,16 @@ namespace neurons {
         }
 
         const Matrix feed_forward(const Matrix& input) const;
-        // TODO const Matrix SGD(training_data, epochs, mini_batch_size, eta, test_data) const;
+        void SGD(const MnistData& training_data, const std::size_t& epochs, const std::size_t& mini_batch_size, const double eta, const MnistData& test_data);
+        void update_mini_batch(const std::vector<std::pair<int, std::vector<unsigned char>>>& data, const double eta);
+        const std::pair<std::vector<Matrix>, std::vector<Matrix>> backprop(const int label, const std::vector<unsigned char>& image) const;
+        int evaluate(const MnistData& data) const { return 0; }
 
     private:
         std::size_t num_layers;
         std::vector<std::size_t> sizes;
-        std::vector<Matrix*> biases;
-        std::vector<Matrix*> weights;
+        std::vector<Matrix> biases;
+        std::vector<Matrix> weights;
     };
 }
 #endif /* NETWORK_H_ */

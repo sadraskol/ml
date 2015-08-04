@@ -61,10 +61,10 @@ TEST(MnistImageParser, shouldNotPermitReadOnNonExistingIndex) {
 }
 
 TEST(MnistData, shouldContainsTheSampleAskedFor) {
-    MnistData data(3, 50000);
+    MnistData data(3, 50);
     ASSERT_EQ(1, data.getLabel(0));
     MnistImageParser parser("data/train-images-idx3-ubyte");
     ASSERT_EQ(parser.getImage(3), data.getImage(0));
-    ASSERT_EQ(49997, data.length());
+    ASSERT_EQ(47, data.size());
 }
 

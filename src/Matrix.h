@@ -17,6 +17,8 @@ namespace neurons {
 
     class Matrix {
     public:
+        Matrix() {}
+
         explicit Matrix(const std::size_t& rows, const std::size_t& cols, const std::vector<double>& _data);
 
         explicit Matrix(const std::size_t& rows, const std::size_t& cols, const std::function<double()>& filler);
@@ -28,6 +30,8 @@ namespace neurons {
         const Matrix product(const Matrix& right) const;
         const Matrix toExp() const;
         const Matrix sigmoid() const;
+        const Matrix sigmoid_prime() const;
+        const Matrix transpose() const;
 
         std::size_t getRows() const { return this->rows; }
         std::size_t getCols() const { return this->cols; }
@@ -42,7 +46,13 @@ namespace neurons {
         }
         const Matrix operator-() const;
         const Matrix operator-(const Matrix& other) const;
+        friend const Matrix operator-(const double& alpha, const Matrix& right) {
+            return right.transform([alpha](const double& input) {
+                return alpha - input;
+            });
+        }
         const Matrix operator*(const double& alpha) const;
+        const Matrix operator*(const Matrix& other) const;
         friend const Matrix operator*(const double& alpha, const Matrix& right) {
             return right.transform([alpha](const double& input) {
                 return input * alpha;
@@ -66,6 +76,8 @@ namespace neurons {
         std::vector<double> data;
     };
 
+
+    const Matrix zeros(const std::size_t& rows, const std::size_t& cols);
 }
 
 #endif /* MATRIX_H_ */
