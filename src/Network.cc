@@ -96,31 +96,30 @@ const std::pair<std::vector<Matrix>, std::vector<Matrix>> Network::backprop(cons
         nabla_b.push_back(neurons::zeros(bias.getRows(), bias.getCols()));
     }
     for (auto weight: this->weights) {
-        nabla_b.push_back(neurons::zeros(weight.getRows(), weight.getCols()));
+        nabla_w.push_back(neurons::zeros(weight.getRows(), weight.getCols()));
     }
 
-    Matrix activation(image.size(), 1, std::vector<double>(image.begin(), image.end()));
-    std::vector<Matrix> activations(1, Matrix(image.size(), 1, std::vector<double>(image.begin(), image.end())));
+    Matrix activation(1, image.size(), std::vector<double>(image.begin(), image.end()));
+    std::vector<Matrix> activations(1, activation);
     std::vector<Matrix> zs(0);
     for (std::size_t i = 0; i < this->weights.size(); i++) {
-        Matrix z = this->weights[i].product(activation) + this->biases[i];
+        Matrix z = activation.product(this->weights[i]) + this->biases[i].transpose();
         zs.push_back(z);
         activation = z.sigmoid();
         activations.push_back(activation);
     }
 
-    {
-        Matrix delta = (-label) + activations[activations.size() - 1];
-        nabla_b[nabla_b.size() - 1] = delta;
-        nabla_w[nabla_w.size() - 1] = delta.product(activations[activations.size() - 2].transpose());
-    }
+    // FIXME what does this delta return ?
+    Matrix delta = ((-label) + activations[activations.size() - 1]) * zs[zs.size() - 1].sigmoid_prime();
+    nabla_b[nabla_b.size() - 1] = delta;
+    nabla_w[nabla_w.size() - 1] = activations[activations.size() - 2].transpose().product(delta);
     for (std::size_t l = 2; l < this->num_layers; l++) {
         Matrix z = zs[zs.size() - l];
         Matrix spv = z.sigmoid_prime();
-        Matrix delta = (this->weights[this->weights.size() + 1 -l].transpose().product(delta)) * spv;
+        // FIXME delta should be some (30 1) matrix not a (30 10) at first iteration
+        Matrix delta = (this->weights[this->weights.size() + 1 - l].transpose().product(delta)) * spv;
         nabla_b[nabla_b.size() - l] = delta;
-        nabla_w[nabla_w.size() - l] = delta.product(activations[activations.size() - l - 1].transpose());
+        nabla_w[nabla_w.size() - l] = activations[activations.size() - l - 1].transpose().product(delta);
     }
     return std::make_pair(nabla_b, nabla_w);
 }
-

@@ -66,6 +66,10 @@ const Matrix Matrix::operator*(const double& alpha) const {
 }
 
 const Matrix Matrix::operator*(const Matrix& other) const {
+    if (this->rows != other.rows || this->cols != other.cols) {
+        printf("(%lu %lu) don't match (%lu %lu)", this->rows, this->cols, other.rows, other.cols);
+        throw std::invalid_argument("matrix sizes do not match");
+    }
     std::vector<double> new_data(this->rows * this->cols);
     for (std::size_t i = 0; i < new_data.size(); i++) {
         new_data[i] = this->data[i] * other.data[i];
@@ -75,9 +79,10 @@ const Matrix Matrix::operator*(const Matrix& other) const {
 
 const Matrix Matrix::product(const Matrix& right) const {
     if (this->cols != right.rows) {
+        printf("could not product with sizes: (%lu %lu) (%lu %lu)", this->rows, this->cols, right.rows, right.cols);
         throw std::invalid_argument("size should match");
     }
-    Matrix product(rows, right.cols, std::vector<double>(this->rows * right.cols));
+    Matrix product(this->rows, right.cols, std::vector<double>(this->rows * right.cols));
     for (std::size_t i = 0; i < this->rows; i++) {
         for (std::size_t j = 0; j < right.cols; j++) {
             double accumulator = 0;
@@ -98,6 +103,10 @@ double Matrix::get(const std::size_t& x, const std::size_t& y) const {
 }
 
 const Matrix Matrix::operator+(const Matrix& other) const {
+    if (this->rows != other.rows || this->cols != other.cols) {
+        printf("(%lu %lu) don't match (%lu %lu)", this->rows, this->cols, other.rows, other.cols);
+        throw std::invalid_argument("matrix sizes do not match");
+    }
     std::vector<double> new_data(this->rows * this->cols);
     for (std::size_t i = 0; i < new_data.size(); i++) {
         new_data[i] = this->data[i] + other.data[i];
@@ -112,6 +121,10 @@ const Matrix Matrix::operator-() const {
 }
 
 const Matrix Matrix::operator-(const Matrix& other) const {
+    if (this->rows != other.rows || this->cols != other.cols) {
+        printf("(%lu %lu) don't match (%lu %lu)", this->rows, this->cols, other.rows, other.cols);
+        throw std::invalid_argument("matrix sizes do not match");
+    }
     std::vector<double> new_data(this->rows * this->cols);
     for (std::size_t i = 0; i < new_data.size(); i++) {
         new_data[i] = this->data[i] - other.data[i];
