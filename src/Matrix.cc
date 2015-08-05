@@ -37,7 +37,7 @@ const std::string Matrix::toString() const {
 	for (std::size_t i = 0; i < rows; i++) {
 		for (std::size_t j = 0; j < cols; j++) {
 			result += " ";
-			result += std::to_string((int) get(i, j));
+			result += std::to_string(get(i, j));
 		}
 		if (i < rows - 1) {
 			result += "\n ";

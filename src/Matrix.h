@@ -23,9 +23,7 @@ namespace neurons {
 
         explicit Matrix(const std::size_t& rows, const std::size_t& cols, const std::function<double()>& filler);
 
-        virtual ~Matrix() {
-            this->data.clear();
-        }
+        virtual ~Matrix() {}
 
         const Matrix product(const Matrix& right) const;
         const Matrix toExp() const;
@@ -67,6 +65,8 @@ namespace neurons {
 
         const std::string toString() const;
         const std::string toPgm() const;
+
+        const std::vector<double> getData() const { return this->data; }
 
     private:
         void set(const std::size_t& i, const std::size_t& j, const double& value);

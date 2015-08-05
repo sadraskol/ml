@@ -7,21 +7,23 @@
 
 #include "Network.h"
 #include "stdio.h"
+#include <ctime>
 
 using neurons::Matrix;
 using neurons::Network;
 using neurons::MnistData;
+
+double gaussian_random_generator() {
+    std::default_random_engine generator(std::clock());
+    std::normal_distribution<double> distribution(0.0, 1.0);
+    return distribution(generator);
+}
 
 Network::Network(const std::vector<std::size_t>& sizes) {
     this->num_layers = sizes.size();
     this->sizes = sizes;
     this->biases = std::vector<Matrix>(0);
     this->weights = std::vector<Matrix>(0);
-    const std::function<double()> gaussian_random_generator = []() {
-        std::default_random_engine generator;
-        std::normal_distribution<double> distribution(0.0, 1.0);
-        return distribution(generator);
-    };
     for (std::size_t size = 1; size < sizes.size(); size++) {
         Matrix element(sizes[size], 1, gaussian_random_generator);
         this->biases.push_back(element);
@@ -33,20 +35,24 @@ Network::Network(const std::vector<std::size_t>& sizes) {
     }
 }
 
-const Matrix Network::feed_forward(const Matrix& input) const {
-    //for b, w in zip(self.biases, self.weights):
-    //   a = sigmoid_vec(np.dot(w, a)+b)
-    //   return a
-    Matrix result = input;
-    for (std::size_t index; index < this->weights.size(); index++) {
-        result = (this->weights[index].product(input) + this->biases[index]).sigmoid();
+static bool abs_compare(const double a, const double b) {
+    return (std::abs(a) < std::abs(b));
+}
+
+const std::size_t Network::feed_forward(const std::vector<unsigned char>& input) const {
+    Matrix output = Matrix(input.size(), 1, std::vector<double>(input.begin(), input.end()));
+    for (std::size_t index = 0; index < this->weights.size(); index++) {
+        output = (this->weights[index].transpose().product(output) + this->biases[index]).sigmoid();
     }
+    std::vector<double> vectorized = output.getData();
+    std::size_t result = std::distance(vectorized.begin(), std::max_element(vectorized.begin(), vectorized.end(), abs_compare));
     return result;
 }
 
 void Network::SGD(const MnistData& training_data, const std::size_t& epochs, const std::size_t& mini_batch_size, const double eta, const MnistData& test_data) {
     const std::size_t n = training_data.size();
     for (std::size_t j = 0; j < epochs; j++) {
+        std::clock_t start_epoch = std::clock();
         std::vector<std::pair<int, std::vector<unsigned char>>> randomized_data = training_data.randomize();
         std::vector<std::vector<std::pair<int, std::vector<unsigned char>>>> mini_batches;
         for (std::size_t k = 0; k < n; k += mini_batch_size) {
@@ -56,20 +62,24 @@ void Network::SGD(const MnistData& training_data, const std::size_t& epochs, con
             }
             mini_batches.push_back(mini_batch);
         }
-        for (auto mini_batch: mini_batches) {
-            this->update_mini_batch(mini_batch, eta);
+        for (std::size_t i = 0; i < mini_batches.size(); i++) {
+            std::clock_t start_batch = std::clock();
+            printf("updating Network with batch %lu / %lu: ", i, mini_batches.size());
+            this->update_mini_batch(mini_batches[i], eta);
+            printf("%li ns\n", std::clock() - start_batch);
         }
-        printf("Epoch %lu: %d / %lu\n", j, this->evaluate(test_data), test_data.size());
+        int evaluation = this->evaluate(test_data);
+        printf("Epoch %lu: %d / %lu (%li)\n", j, evaluation, test_data.size(), std::clock() - start_epoch);
     }
 }
 
 void Network::update_mini_batch(const std::vector<std::pair<int, std::vector<unsigned char>>>& mini_batch, const double eta) {
-    std::vector<Matrix> nabla_b, nabla_w;
+    std::vector<Matrix> nabla_b(0), nabla_w(0);
     for (auto bias: this->biases) {
         nabla_b.push_back(neurons::zeros(bias.getRows(), bias.getCols()));
     }
     for (auto weight: this->weights) {
-        nabla_b.push_back(neurons::zeros(weight.getRows(), weight.getCols()));
+        nabla_w.push_back(neurons::zeros(weight.getRows(), weight.getCols()));
     }
     for (auto batch: mini_batch) {
         std::pair<std::vector<Matrix>, std::vector<Matrix>> delta_nablas = this->backprop(batch.first, batch.second);
@@ -99,27 +109,36 @@ const std::pair<std::vector<Matrix>, std::vector<Matrix>> Network::backprop(cons
         nabla_w.push_back(neurons::zeros(weight.getRows(), weight.getCols()));
     }
 
-    Matrix activation(1, image.size(), std::vector<double>(image.begin(), image.end()));
+    Matrix activation(image.size(), 1, std::vector<double>(image.begin(), image.end()));
     std::vector<Matrix> activations(1, activation);
     std::vector<Matrix> zs(0);
     for (std::size_t i = 0; i < this->weights.size(); i++) {
-        Matrix z = activation.product(this->weights[i]) + this->biases[i].transpose();
+        Matrix z = this->weights[i].transpose().product(activation) + this->biases[i];
         zs.push_back(z);
         activation = z.sigmoid();
         activations.push_back(activation);
     }
 
-    // FIXME what does this delta return ?
     Matrix delta = ((-label) + activations[activations.size() - 1]) * zs[zs.size() - 1].sigmoid_prime();
     nabla_b[nabla_b.size() - 1] = delta;
-    nabla_w[nabla_w.size() - 1] = activations[activations.size() - 2].transpose().product(delta);
+    nabla_w[nabla_w.size() - 1] = activations[activations.size() - 2].product(delta.transpose());
     for (std::size_t l = 2; l < this->num_layers; l++) {
         Matrix z = zs[zs.size() - l];
         Matrix spv = z.sigmoid_prime();
-        // FIXME delta should be some (30 1) matrix not a (30 10) at first iteration
-        Matrix delta = (this->weights[this->weights.size() + 1 - l].transpose().product(delta)) * spv;
+        delta = this->weights[this->weights.size() + 1 - l].product(delta) * spv;
         nabla_b[nabla_b.size() - l] = delta;
-        nabla_w[nabla_w.size() - l] = activations[activations.size() - l - 1].transpose().product(delta);
+        nabla_w[nabla_w.size() - l] = activations[activations.size() - l - 1].product(delta.transpose());
     }
     return std::make_pair(nabla_b, nabla_w);
+}
+
+int Network::evaluate(const MnistData& data) const {
+    std::vector<std::pair<int, std::vector<unsigned char>>> test_data = data.randomize();
+    int total = 0;
+    for (std::size_t i = 0; i < test_data.size(); i++) {
+        if (test_data[i].first == this->feed_forward(test_data[i].second)) {
+            total += 1;
+        }
+    }
+    return total;
 }
