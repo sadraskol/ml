@@ -134,3 +134,8 @@ TEST(MatrixTest, transpose) {
   ASSERT_STREQ("[ 0.000000 0.000000\n  1.000000 1.000000\n  0.000000 0.000000 ]", matrix.transpose().toString().c_str());
 }
 
+TEST(MatrixTest, argmaxGetsTheIndexOfTheLargestEntryInSet) {
+  Matrix matrix(6, 1, std::vector<double> { 0, 2, 0, 0, 1, 0 });
+  EXPECT_EQ(1, matrix.argmax());
+}
+

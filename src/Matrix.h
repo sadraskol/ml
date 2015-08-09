@@ -19,7 +19,7 @@ namespace neurons {
     public:
         Matrix() {}
 
-        explicit Matrix(const std::size_t& rows, const std::size_t& cols, const std::vector<double>& _data);
+        explicit Matrix(const std::size_t& _rows, const std::size_t& _cols, const std::vector<double>& _data);
 
         explicit Matrix(const std::size_t& rows, const std::size_t& cols, const std::function<double()>& filler);
 
@@ -64,6 +64,7 @@ namespace neurons {
             });
         }
 
+        std::size_t argmax() const;
         const std::string toString() const;
         const std::string toPgm() const;
         const std::vector<double> getData() const { return this->data; }

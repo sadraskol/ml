@@ -7,13 +7,14 @@
 
 #include "Matrix.h"
 #include <cmath>
+#include <algorithm>
 #include <sstream>
 
 using neurons::Matrix;
 
 Matrix::Matrix(const std::size_t& rows, const std::size_t& cols,
     const std::vector<double>& _data) {
-  if (_data.size() < rows * cols) {
+  if (_data.size() != rows * cols) {
     throw std::invalid_argument("Data contains not enough data");
   }
   this->rows = rows;
@@ -192,6 +193,16 @@ const Matrix Matrix::transpose() const {
     }
   }
   return Matrix(this->cols, this->rows, new_data);
+}
+
+static bool abs_compare(const double& a, const double& b) {
+  return std::abs(a) < std::abs(b);
+}
+
+std::size_t Matrix::argmax() const {
+  const std::vector<double> v = this->getData();
+  return std::distance(v.begin(),
+      std::max_element(v.begin(), v.end(), abs_compare));
 }
 
 const Matrix Matrix::zeros(const std::size_t& rows, const std::size_t& cols) {

@@ -31,28 +31,22 @@ Network::Network(const std::vector<std::size_t>& sizes) {
   }
 }
 
-static bool abs_compare(const double a, const double b) {
-  return (std::abs(a) < std::abs(b));
-}
-
-const std::size_t Network::feed_forward(const std::vector<unsigned char>& input) const {
+const Matrix Network::feed_forward(const std::vector<unsigned char>& input) const {
   Matrix output = Matrix(input.size(), 1, std::vector<double>(input.begin(), input.end()));
   for (std::size_t index = 0; index < this->weights.size(); index++) {
     output = (this->weights[index].transpose().product(output) + this->biases[index]).sigmoid();
   }
-  std::vector<double> vectorized = output.getData();
-  std::size_t result = std::distance(vectorized.begin(), std::max_element(vectorized.begin(), vectorized.end(), abs_compare));
-  return result;
+  return output;
 }
 
 void Network::SGD(const MnistData& training_data, const std::size_t& epochs, const std::size_t& mini_batch_size, const double eta, const MnistData& test_data) {
   const std::size_t n = training_data.size();
   for (std::size_t j = 0; j < epochs; j++) {
     std::clock_t start_epoch = std::clock();
-    std::vector<std::pair<int, std::vector<unsigned char>>> randomized_data = training_data.randomize();
-    std::vector<std::vector<std::pair<int, std::vector<unsigned char>>>> mini_batches;
+    std::vector<std::pair<Matrix, std::vector<unsigned char>>> randomized_data = training_data.randomize();
+    std::vector<std::vector<std::pair<Matrix, std::vector<unsigned char>>>> mini_batches;
     for (std::size_t k = 0; k < n; k += mini_batch_size) {
-      std::vector<std::pair<int, std::vector<unsigned char>>> mini_batch;
+      std::vector<std::pair<Matrix, std::vector<unsigned char>>> mini_batch;
       for (std::size_t l = 0; l < mini_batch_size; l++) {
         mini_batch.push_back(randomized_data[k + l]);
       }
@@ -66,7 +60,7 @@ void Network::SGD(const MnistData& training_data, const std::size_t& epochs, con
   }
 }
 
-void Network::update_mini_batch(const std::vector<std::pair<int, std::vector<unsigned char>>>& mini_batch, const double eta) {
+void Network::update_mini_batch(const std::vector<std::pair<Matrix, std::vector<unsigned char>>>& mini_batch, const double eta) {
   std::vector<Matrix> nabla_b(0), nabla_w(0);
   for (auto bias: this->biases) {
     nabla_b.push_back(Matrix::zeros(bias.getRows(), bias.getCols()));
@@ -93,7 +87,7 @@ void Network::update_mini_batch(const std::vector<std::pair<int, std::vector<uns
   }
 }
 
-const std::pair<std::vector<Matrix>, std::vector<Matrix>> Network::backprop(const int label, const std::vector<unsigned char>& image) const {
+const std::pair<std::vector<Matrix>, std::vector<Matrix>> Network::backprop(const Matrix& label, const std::vector<unsigned char>& image) const {
   std::vector<Matrix> nabla_b, nabla_w;
   for (auto bias: this->biases) {
     nabla_b.push_back(Matrix::zeros(bias.getRows(), bias.getCols()));
@@ -127,24 +121,19 @@ const std::pair<std::vector<Matrix>, std::vector<Matrix>> Network::backprop(cons
 }
 
 int Network::evaluate(const MnistData& data) const {
-  std::vector<std::pair<int, std::vector<unsigned char>>> test_data = data.randomize();
+  std::vector<std::pair<Matrix, std::vector<unsigned char>>> test_data = data.randomize();
   int total = 0;
   for (std::size_t i = 0; i < test_data.size(); i++) {
-    if (test_data[i].first == this->feed_forward(test_data[i].second)) {
+    const std::size_t expected = test_data[i].first.argmax();
+    const std::size_t actual = this->feed_forward(test_data[i].second).argmax();
+    if (actual == expected) {
       total += 1;
     }
   }
   return total;
 }
 
-const Matrix Network::cost_derivative(const Matrix& activation, const std::size_t& label) const {
-  std::vector<double> values = this->outputFor(label);
-  return activation + Matrix(values.size(), 1, values); 
-}
-
-const std::vector<double> Network::outputFor(const std::size_t& index) const {
-  std::vector<double> result(this->sizes[this->sizes.size() - 1]);
-  result[index] = -1;
-  return result;
+const Matrix Network::cost_derivative(const Matrix& activation, const Matrix& label) const {
+  return activation - label;
 }
 
