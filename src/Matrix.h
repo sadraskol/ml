@@ -37,6 +37,7 @@ namespace neurons {
         double get(const std::size_t& x, const std::size_t& y) const;
 
         const Matrix operator+(const Matrix& other) const;
+        Matrix& operator+=(const Matrix& other);
         friend const Matrix operator+(const double& alpha, const Matrix& right) {
             return right.transform([alpha](const double& input) {
                 return input + alpha;
@@ -65,8 +66,9 @@ namespace neurons {
 
         const std::string toString() const;
         const std::string toPgm() const;
-
         const std::vector<double> getData() const { return this->data; }
+
+        static const Matrix zeros(const std::size_t& rows, const std::size_t& cols);
 
     private:
         void set(const std::size_t& i, const std::size_t& j, const double& value);
@@ -77,7 +79,6 @@ namespace neurons {
     };
 
 
-    const Matrix zeros(const std::size_t& rows, const std::size_t& cols);
 }
 
 #endif /* MATRIX_H_ */
