@@ -18,90 +18,92 @@
 
 namespace neurons {
 
-    class MnistLabelParser {
+  class MnistLabelParser {
     public:
-        MnistLabelParser(const std::string& file_location) {
-            this->file_location = file_location;
-        }
+      MnistLabelParser(const std::string& file_location) {
+        this->file_location = file_location;
+      }
 
-        int getLabel(const std::size_t& index) const {
-            if (8 + index < 8 || 8 + index > (unsigned int) this->file_size()) {
-                throw std::invalid_argument("index too large");
-            }
-            std::ifstream label_file(this->file_location, std::ifstream::binary);
-            return label_file.seekg(8 + index).get();
+      int getLabel(const std::size_t& index) const {
+        if (8 + index < 8 || 8 + index > (unsigned int) this->file_size()) {
+          throw std::invalid_argument("index too large");
         }
+        std::ifstream label_file(this->file_location, std::ifstream::binary);
+        return label_file.seekg(8 + index).get();
+      }
 
-        virtual ~MnistLabelParser() {}
+      virtual ~MnistLabelParser() {}
     private:
-        const std::ifstream::pos_type file_size() const {
-            std::ifstream in(this->file_location, std::ifstream::ate | std::ifstream::binary);
-            return in.tellg(); 
-        }
-        std::string file_location;
-    };
+      const std::ifstream::pos_type file_size() const {
+        std::ifstream in(this->file_location, std::ifstream::ate | std::ifstream::binary);
+        return in.tellg(); 
+      }
+      std::string file_location;
+  };
 
-    class MnistImageParser {
+  class MnistImageParser {
     public:
-        MnistImageParser(const std::string& file_location) {
-            this->file_location = file_location;
-        }
+      MnistImageParser(const std::string& file_location) {
+        this->file_location = file_location;
+      }
 
-        const std::vector<unsigned char> getImage(const std::size_t& index) const {
-            if (16 + index < 16 || 16 + index * 784 > (unsigned int) this->file_size()) {
-                throw std::invalid_argument("index too large");
-            }
-            std::ifstream label_file(this->file_location, std::ifstream::binary);
-            label_file.seekg(16 + index * 784);
-            char result[784];
-            label_file.read(result, 784);
-            return std::vector<unsigned char>(result, result + sizeof(result) / sizeof(char));
+      const std::vector<unsigned char> getImage(const std::size_t& index) const {
+        if (16 + index < 16 || 16 + index * 784 > (unsigned int) this->file_size()) {
+          throw std::invalid_argument("index too large");
         }
+        std::ifstream label_file(this->file_location, std::ifstream::binary);
+        label_file.seekg(16 + index * 784);
+        char result[784];
+        label_file.read(result, 784);
+        return std::vector<unsigned char>(result, result + sizeof(result) / sizeof(char));
+      }
 
-        virtual ~MnistImageParser() {}
+      virtual ~MnistImageParser() {}
     private:
-        int file_size() const {
-            std::ifstream in(this->file_location, std::ifstream::ate | std::ifstream::binary);
-            return in.tellg(); 
-        }
-        std::string file_location;
-    };
+      int file_size() const {
+        std::ifstream in(this->file_location, std::ifstream::ate | std::ifstream::binary);
+        return in.tellg(); 
+      }
+      std::string file_location;
+  };
 
-    class MnistData {
+  class MnistData {
     public:
-        MnistData(const std::size_t& lower_bound, const std::size_t& upped_bound): min(lower_bound), max(upped_bound) {
-            this->data = std::vector<std::pair<int, std::vector<unsigned char>>>(0);
-            for (std::size_t i = 0; i < this->size(); i++) {
-                this->data.push_back(std::make_pair(this->getLabel(i), this->getImage(i)));
-            }
+      MnistData(const std::size_t& lower_bound, const std::size_t& upped_bound): min(lower_bound), max(upped_bound) {
+        this->data = std::vector<std::pair<int, std::vector<unsigned char>>>(0);
+        for (std::size_t i = 0; i < this->size(); i++) {
+          this->data.push_back(std::make_pair(this->getLabel(i), this->getImage(i)));
         }
+      }
 
-        virtual ~MnistData() {}
+      virtual ~MnistData() {}
 
-        int getLabel(const std::size_t& index) const {
-            return labels.getLabel(this->min + index);
-        }
+      int getLabel(const std::size_t& index) const {
+        return labels.getLabel(this->min + index);
+      }
 
-        const std::vector<unsigned char> getImage(std::size_t index) const {
-            return images.getImage(this->min + index);
-        }
+      const std::vector<unsigned char> getImage(std::size_t index) const {
+        return images.getImage(this->min + index);
+      }
 
-        std::size_t size() const {
-            return this->max - this->min;
-        }
+      std::size_t size() const {
+        return this->max - this->min;
+      }
 
-        const std::vector<std::pair<int, std::vector<unsigned char>>> randomize() const {
-            std::vector<std::pair<int, std::vector<unsigned char>>> copy = this->data;
-            std::random_shuffle(copy.begin(), copy.end());
-            return copy;
-        };
+      const std::vector<std::pair<int, std::vector<unsigned char>>> randomize() const {
+        std::vector<std::pair<int, std::vector<unsigned char>>> copy = this->data;
+        std::random_device rd;
+        std::mt19937 g(rd());
+        std::random_shuffle(copy.begin(), copy.end(), g);
+        return copy;
+      };
 
     private:
-        std::vector<std::pair<int, std::vector<unsigned char>>> data;
-        std::size_t min, max;
-        MnistLabelParser labels = MnistLabelParser("data/train-labels-idx1-ubyte");
-        MnistImageParser images = MnistImageParser("data/train-images-idx3-ubyte");
-    };
+      std::vector<std::pair<int, std::vector<unsigned char>>> data;
+      std::size_t min, max;
+      MnistLabelParser labels = MnistLabelParser("data/train-labels-idx1-ubyte");
+      MnistImageParser images = MnistImageParser("data/train-images-idx3-ubyte");
+  };
 
 } /* namespace neurons */
 
