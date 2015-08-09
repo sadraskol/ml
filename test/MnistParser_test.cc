@@ -7,7 +7,7 @@
 
 #include "gtest/gtest.h"
 #include "../src/MnistParser.h"
-
+#include <vector>
 #include <exception>
 
 using neurons::MnistLabelParser;

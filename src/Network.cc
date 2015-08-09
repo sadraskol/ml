@@ -14,7 +14,7 @@ using neurons::Network;
 using neurons::MnistData;
 
 static double gaussian_random_generator() {
-  static std::default_random_engine generator(std::clock());
+  std::default_random_engine generator(std::clock());
   static std::normal_distribution<double> distribution(0.0, 1.0);
   return distribution(generator);
 }
@@ -112,7 +112,8 @@ const std::pair<std::vector<Matrix>, std::vector<Matrix>> Network::backprop(cons
     activations.push_back(activation);
   }
 
-  Matrix delta = ((-label) + activations[activations.size() - 1]) * zs[zs.size() - 1].sigmoid_prime();
+  Matrix delta = this->cost_derivative(activations[activations.size() - 1], label) \
+                 * zs[zs.size() - 1].sigmoid_prime();
   nabla_b[nabla_b.size() - 1] = delta;
   nabla_w[nabla_w.size() - 1] = activations[activations.size() - 2].product(delta.transpose());
   for (std::size_t l = 2; l < this->num_layers; l++) {
@@ -135,3 +136,15 @@ int Network::evaluate(const MnistData& data) const {
   }
   return total;
 }
+
+const Matrix Network::cost_derivative(const Matrix& activation, const std::size_t& label) const {
+  std::vector<double> values = this->outputFor(label);
+  return activation + Matrix(values.size(), 1, values); 
+}
+
+const std::vector<double> Network::outputFor(const std::size_t& index) const {
+  std::vector<double> result(this->sizes[this->sizes.size() - 1]);
+  result[index] = -1;
+  return result;
+}
+

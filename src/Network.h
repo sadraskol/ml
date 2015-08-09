@@ -32,6 +32,9 @@ namespace neurons {
       const std::pair<std::vector<Matrix>, std::vector<Matrix>> backprop(const int label, const std::vector<unsigned char>& image) const;
       int evaluate(const MnistData& data) const;
 
+      const Matrix cost_derivative(const Matrix& activation, const std::size_t& label) const;
+      const std::vector<double> outputFor(const std::size_t& index) const;
+
     private:
       std::size_t num_layers;
       std::vector<std::size_t> sizes;
