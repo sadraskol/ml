@@ -22,6 +22,14 @@ Matrix::Matrix(const std::size_t& rows, const std::size_t& cols,
   this->data = _data;
 }
 
+const Matrix Matrix::create(const std::size_t& rows, const std::size_t& cols,
+    const std::vector<double>& data) {
+  if (data.size() != rows * cols) {
+    throw std::invalid_argument("Data contains not enough data");
+  }
+  return Matrix(rows, cols, data);
+}
+
 Matrix::Matrix(const std::size_t& rows, const std::size_t& cols, const std::function<double()>& filler) {
   this->rows = rows;
   this->cols = cols;

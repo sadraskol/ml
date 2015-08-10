@@ -31,8 +31,8 @@ Network::Network(const std::vector<std::size_t>& sizes) {
   }
 }
 
-const Matrix Network::feed_forward(const std::vector<double>& input) const {
-  Matrix output = Matrix(input.size(), 1, std::vector<double>(input.begin(), input.end()));
+const Matrix Network::feed_forward(const Matrix& input) const {
+  Matrix output = input;
   for (std::size_t index = 0; index < this->weights.size(); index++) {
     output = (this->weights[index].transpose().product(output) + this->biases[index]).sigmoid();
   }
@@ -43,10 +43,10 @@ void Network::SGD(const MnistData& training_data, const std::size_t& epochs, con
   const std::size_t n = training_data.size();
   for (std::size_t j = 0; j < epochs; j++) {
     std::clock_t start_epoch = std::clock();
-    std::vector<std::pair<Matrix, std::vector<double>>> randomized_data = training_data.randomize();
-    std::vector<std::vector<std::pair<Matrix, std::vector<double>>>> mini_batches;
+    std::vector<std::pair<Matrix, Matrix>> randomized_data = training_data.randomize();
+    std::vector<std::vector<std::pair<Matrix, Matrix>>> mini_batches;
     for (std::size_t k = 0; k < n; k += mini_batch_size) {
-      std::vector<std::pair<Matrix, std::vector<double>>> mini_batch;
+      std::vector<std::pair<Matrix, Matrix>> mini_batch;
       for (std::size_t l = 0; l < mini_batch_size; l++) {
         mini_batch.push_back(randomized_data[k + l]);
       }
@@ -60,7 +60,7 @@ void Network::SGD(const MnistData& training_data, const std::size_t& epochs, con
   }
 }
 
-void Network::update_mini_batch(const std::vector<std::pair<Matrix, std::vector<double>>>& mini_batch, const double eta) {
+void Network::update_mini_batch(const std::vector<std::pair<Matrix, Matrix>>& mini_batch, const double eta) {
   std::vector<Matrix> nabla_b(0), nabla_w(0);
   for (auto bias: this->biases) {
     nabla_b.push_back(Matrix::zeros(bias.getRows(), bias.getCols()));
@@ -87,7 +87,7 @@ void Network::update_mini_batch(const std::vector<std::pair<Matrix, std::vector<
   }
 }
 
-const std::pair<std::vector<Matrix>, std::vector<Matrix>> Network::backprop(const Matrix& label, const std::vector<double>& image) const {
+const std::pair<std::vector<Matrix>, std::vector<Matrix>> Network::backprop(const Matrix& label, const Matrix& image) const {
   std::vector<Matrix> nabla_b, nabla_w;
   for (auto bias: this->biases) {
     nabla_b.push_back(Matrix::zeros(bias.getRows(), bias.getCols()));
@@ -96,7 +96,7 @@ const std::pair<std::vector<Matrix>, std::vector<Matrix>> Network::backprop(cons
     nabla_w.push_back(Matrix::zeros(weight.getRows(), weight.getCols()));
   }
 
-  Matrix activation(image.size(), 1, std::vector<double>(image.begin(), image.end()));
+  Matrix activation = image;
   std::vector<Matrix> activations(1, activation);
   std::vector<Matrix> zs(0);
   for (std::size_t i = 0; i < this->weights.size(); i++) {
@@ -121,7 +121,7 @@ const std::pair<std::vector<Matrix>, std::vector<Matrix>> Network::backprop(cons
 }
 
 int Network::evaluate(const MnistData& data) const {
-  std::vector<std::pair<Matrix, std::vector<double>>> test_data = data.randomize();
+  std::vector<std::pair<Matrix, Matrix>> test_data = data.randomize();
   int total = 0;
   for (std::size_t i = 0; i < test_data.size(); i++) {
     const std::size_t expected = test_data[i].first.argmax();

@@ -26,20 +26,14 @@ TEST(MnistLabelParser, shouldReturnTheFirstNumbersCorrectly) {
 
 TEST(MnistLabelParser, shouldNotPermitReadOnNonExistingIndex) {
     MnistLabelParser parser("data/train-labels-idx1-ubyte");
-    try {
-        parser.getLabel(-1);
-        FAIL() << "Should be out of bound";
-    } catch (std::exception& e) {}
+    EXPECT_THROW({ parser.getLabel(-1); } ,std::exception);
     parser.getLabel(60000);
-    try {
-        parser.getLabel(60001);
-        FAIL() << "Should be out of bound";
-    } catch (std::exception& e) {}
+    EXPECT_THROW({ parser.getLabel(60001); }, std::exception);
 }
 
 TEST(MnistImageParser, shouldReturnTheNthImageVectorized) {
     MnistImageParser parser("data/train-images-idx3-ubyte");
-    std::vector<double> image = parser.getImage(0);
+    std::vector<double> image = parser.getImage(0).getData();
     std::ostringstream oss;
     for (std::size_t i = 7 * 28; i < 8 * 28; i++) {
         oss << image[i] << " ";
@@ -49,22 +43,16 @@ TEST(MnistImageParser, shouldReturnTheNthImageVectorized) {
 
 TEST(MnistImageParser, shouldNotPermitReadOnNonExistingIndex) {
     MnistImageParser parser("data/train-images-idx3-ubyte");
-    try {
-        parser.getImage(-1);
-        FAIL() << "Should be out of bound";
-    } catch (std::exception& e) {}
+    EXPECT_THROW({ parser.getImage(-1); } ,std::exception);
     parser.getImage(60000);
-    try {
-        parser.getImage(60001);
-        FAIL() << "Should be out of bound";
-    } catch (std::exception& e) {}
+    EXPECT_THROW({ parser.getImage(60001); } ,std::exception);
 }
 
 TEST(MnistData, shouldContainsTheSampleAskedFor) {
     MnistData data(3, 50);
     ASSERT_EQ(std::vector<double>({ 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 }), data.getLabel(0).getData());
     MnistImageParser parser("data/train-images-idx3-ubyte");
-    ASSERT_EQ(parser.getImage(3), data.getImage(0));
+    ASSERT_EQ(parser.getImage(3).getData(), data.getImage(0).getData());
     ASSERT_EQ(47, data.size());
 }
 

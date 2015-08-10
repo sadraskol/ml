@@ -28,7 +28,7 @@ namespace neurons {
       const Matrix getLabel(const std::size_t& index) const {
         int label = getLabelAsInt(index);
         const std::vector<double> data = vectorize(label);
-        return Matrix(10, 1, data);
+        return Matrix::create(10, 1, data);
       }
 
       virtual ~MnistLabelParser() {}
@@ -62,7 +62,15 @@ namespace neurons {
         this->file_location = file_location;
       }
 
-      const std::vector<double> getImage(const std::size_t& index) const {
+      const Matrix getImage(const std::size_t& index) const {
+        std::vector<double> result(784, 0);
+        result = this->getImageVector(index);
+        return Matrix::create(784, 1, result);
+      }
+
+      virtual ~MnistImageParser() {}
+    private:
+      const std::vector<double> getImageVector(const std::size_t& index) const {
         if (16 + index < 16 || 16 + index * 784 > static_cast<std::size_t>(this->file_size())) {
           throw std::invalid_argument("index too large");
         }
@@ -76,9 +84,6 @@ namespace neurons {
         }
         return result;
       }
-
-      virtual ~MnistImageParser() {}
-    private:
       int file_size() const {
         std::ifstream in(this->file_location, std::ifstream::ate | std::ifstream::binary);
         return in.tellg(); 
@@ -89,7 +94,7 @@ namespace neurons {
   class MnistData {
     public:
       MnistData(const std::size_t& lower_bound, const std::size_t& upped_bound): min(lower_bound), max(upped_bound) {
-        this->data = std::vector<std::pair<Matrix, std::vector<double>>>(this->size());
+        this->data = std::vector<std::pair<Matrix, Matrix>>(this->size());
         for (std::size_t i = 0; i < this->size(); i++) {
           this->data[i] = std::make_pair(this->getLabel(i), this->getImage(i));
         }
@@ -101,7 +106,7 @@ namespace neurons {
         return labels.getLabel(this->min + index);
       }
 
-      const std::vector<double> getImage(const std::size_t& index) const {
+      const Matrix getImage(const std::size_t& index) const {
         return images.getImage(this->min + index);
       }
 
@@ -109,15 +114,14 @@ namespace neurons {
         return this->max - this->min;
       }
 
-      const std::vector<std::pair<Matrix, std::vector<double>>> randomize() const {
-        std::vector<std::pair<Matrix, std::vector<double>>> copy = this->data;
-        // TODO give a random number generator
+      const std::vector<std::pair<Matrix, Matrix>> randomize() const {
+        std::vector<std::pair<Matrix, Matrix>> copy = this->data;
         std::random_shuffle(copy.begin(), copy.end());
         return copy;
       };
 
     private:
-      std::vector<std::pair<Matrix, std::vector<double>>> data;
+      std::vector<std::pair<Matrix, Matrix>> data;
       std::size_t min, max;
       MnistLabelParser labels = MnistLabelParser("data/train-labels-idx1-ubyte");
       MnistImageParser images = MnistImageParser("data/train-images-idx3-ubyte");

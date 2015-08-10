@@ -69,6 +69,8 @@ namespace neurons {
         const std::string toPgm() const;
         const std::vector<double> getData() const { return this->data; }
 
+        static const Matrix create(const std::size_t& rows, const std::size_t& cols,
+            const std::vector<double>& data);
         static const Matrix zeros(const std::size_t& rows, const std::size_t& cols);
 
     private:
