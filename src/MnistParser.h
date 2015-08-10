@@ -62,15 +62,19 @@ namespace neurons {
         this->file_location = file_location;
       }
 
-      const std::vector<unsigned char> getImage(const std::size_t& index) const {
-        if (16 + index < 16 || 16 + index * 784 > (unsigned int) this->file_size()) {
+      const std::vector<double> getImage(const std::size_t& index) const {
+        if (16 + index < 16 || 16 + index * 784 > static_cast<std::size_t>(this->file_size())) {
           throw std::invalid_argument("index too large");
         }
         std::ifstream label_file(this->file_location, std::ifstream::binary);
         label_file.seekg(16 + index * 784);
-        char result[784];
-        label_file.read(result, 784);
-        return std::vector<unsigned char>(result, result + sizeof(result) / sizeof(char));
+        char buffer[784];
+        label_file.read(buffer, 784);
+        std::vector<double> result(784);
+        for (int i = 0; i < 784; i++) {
+          result[i] = static_cast<double>(static_cast<unsigned char>(buffer[i])) / 255;
+        }
+        return result;
       }
 
       virtual ~MnistImageParser() {}
@@ -85,7 +89,7 @@ namespace neurons {
   class MnistData {
     public:
       MnistData(const std::size_t& lower_bound, const std::size_t& upped_bound): min(lower_bound), max(upped_bound) {
-        this->data = std::vector<std::pair<Matrix, std::vector<unsigned char>>>(this->size());
+        this->data = std::vector<std::pair<Matrix, std::vector<double>>>(this->size());
         for (std::size_t i = 0; i < this->size(); i++) {
           this->data[i] = std::make_pair(this->getLabel(i), this->getImage(i));
         }
@@ -97,7 +101,7 @@ namespace neurons {
         return labels.getLabel(this->min + index);
       }
 
-      const std::vector<unsigned char> getImage(std::size_t index) const {
+      const std::vector<double> getImage(const std::size_t& index) const {
         return images.getImage(this->min + index);
       }
 
@@ -105,15 +109,15 @@ namespace neurons {
         return this->max - this->min;
       }
 
-      const std::vector<std::pair<Matrix, std::vector<unsigned char>>> randomize() const {
-        std::vector<std::pair<Matrix, std::vector<unsigned char>>> copy = this->data;
+      const std::vector<std::pair<Matrix, std::vector<double>>> randomize() const {
+        std::vector<std::pair<Matrix, std::vector<double>>> copy = this->data;
         // TODO give a random number generator
         std::random_shuffle(copy.begin(), copy.end());
         return copy;
       };
 
     private:
-      std::vector<std::pair<Matrix, std::vector<unsigned char>>> data;
+      std::vector<std::pair<Matrix, std::vector<double>>> data;
       std::size_t min, max;
       MnistLabelParser labels = MnistLabelParser("data/train-labels-idx1-ubyte");
       MnistImageParser images = MnistImageParser("data/train-images-idx3-ubyte");

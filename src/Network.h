@@ -26,10 +26,10 @@ namespace neurons {
         this->weights.clear();
       }
 
-      const Matrix feed_forward(const std::vector<unsigned char>& input) const;
+      const Matrix feed_forward(const std::vector<double>& input) const;
       void SGD(const MnistData& training_data, const std::size_t& epochs, const std::size_t& mini_batch_size, const double eta, const MnistData& test_data);
-      void update_mini_batch(const std::vector<std::pair<Matrix, std::vector<unsigned char>>>& data, const double eta);
-      const std::pair<std::vector<Matrix>, std::vector<Matrix>> backprop(const Matrix& label, const std::vector<unsigned char>& image) const;
+      void update_mini_batch(const std::vector<std::pair<Matrix, std::vector<double>>>& data, const double eta);
+      const std::pair<std::vector<Matrix>, std::vector<Matrix>> backprop(const Matrix& label, const std::vector<double>& image) const;
       int evaluate(const MnistData& data) const;
 
       const Matrix cost_derivative(const Matrix& activation, const Matrix& label) const;

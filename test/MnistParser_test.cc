@@ -39,12 +39,12 @@ TEST(MnistLabelParser, shouldNotPermitReadOnNonExistingIndex) {
 
 TEST(MnistImageParser, shouldReturnTheNthImageVectorized) {
     MnistImageParser parser("data/train-images-idx3-ubyte");
-    std::vector<unsigned char> image = parser.getImage(0);
+    std::vector<double> image = parser.getImage(0);
     std::ostringstream oss;
     for (std::size_t i = 7 * 28; i < 8 * 28; i++) {
-        oss << (int) image[i] << " ";
+        oss << image[i] << " ";
     }
-    ASSERT_STREQ("0 0 0 0 0 0 0 49 238 253 253 253 253 253 253 253 253 251 93 82 82 56 39 0 0 0 0 0 ", oss.str().c_str());
+    ASSERT_STREQ("0 0 0 0 0 0 0 0.192157 0.933333 0.992157 0.992157 0.992157 0.992157 0.992157 0.992157 0.992157 0.992157 0.984314 0.364706 0.321569 0.321569 0.219608 0.152941 0 0 0 0 0 ", oss.str().c_str());
 }
 
 TEST(MnistImageParser, shouldNotPermitReadOnNonExistingIndex) {
