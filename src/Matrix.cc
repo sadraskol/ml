@@ -167,20 +167,20 @@ void Matrix::set(const std::size_t& i, const std::size_t& j, const double& value
 
 const Matrix Matrix::toExp() const {
   return this->transform([](const double& input) {
-    return exp(input);
-  });
+      return exp(input);
+      });
 }
 
 const Matrix Matrix::sigmoid() const {
   return this->transform([](const double& input) {
-    return 1 / ( 1 + exp(-input));
-  });
+      return 1 / ( 1 + exp(-input));
+      });
 }
 
 const Matrix Matrix::sigmoid_prime() const {
   return this->transform([](const double& input) {
-    return (1 / ( 1 + exp(-input))) * ( 1 - (1 / ( 1 + exp(-input))));
-  });
+      return (1 / ( 1 + exp(-input))) * ( 1 - (1 / ( 1 + exp(-input))));
+      });
 }
 
 const Matrix Matrix::transform(const std::function<double(double)>& transformer) const {
