@@ -79,7 +79,7 @@ namespace neurons {
       std::size_t cols;
       std::vector<double> data;
   };
-}
+} // namespace neurons
 
 #endif /* MATRIX_H_ */
 

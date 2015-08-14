@@ -19,6 +19,12 @@ static double gaussian_random_generator() {
   return distribution(generator);
 }
 
+Network::Network(const std::vector<Matrix>& _weights, const std::vector<Matrix>& _biases) {
+  this->weights = _weights;
+  this->biases = _biases;
+  this->num_layers = _weights.size();
+}
+
 Network::Network(const std::vector<std::size_t>& sizes) {
   this->num_layers = sizes.size();
   this->sizes = sizes;

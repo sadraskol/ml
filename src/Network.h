@@ -18,7 +18,8 @@
 namespace neurons {
   class Network {
     public:
-      Network(const std::vector<std::size_t>& sizes);
+      explicit Network(const std::vector<Matrix>& weights, const std::vector<Matrix>& biases);
+      explicit Network(const std::vector<std::size_t>& sizes);
 
       virtual ~Network() {
         this->sizes.clear();
