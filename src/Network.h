@@ -12,14 +12,15 @@
 #include <algorithm>
 #include <functional>
 #include <utility>
+#include "Cost.h"
 #include "Matrix.h"
 #include "MnistParser.h"
 
 namespace neurons {
   class Network {
     public:
-      explicit Network(const std::vector<Matrix>& weights, const std::vector<Matrix>& biases);
-      explicit Network(const std::vector<std::size_t>& sizes);
+      explicit Network(const std::vector<Matrix>& weights, const std::vector<Matrix>& biases, const Cost* cost);
+      explicit Network(const std::vector<std::size_t>& sizes, const Cost* cost);
 
       virtual ~Network() {
         this->sizes.clear();
@@ -40,6 +41,7 @@ namespace neurons {
       std::vector<std::size_t> sizes;
       std::vector<Matrix> biases;
       std::vector<Matrix> weights;
+      const Cost* cost;
   };
 }
 #endif /* NETWORK_H_ */

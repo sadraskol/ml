@@ -19,13 +19,15 @@ static double gaussian_random_generator() {
   return distribution(generator);
 }
 
-Network::Network(const std::vector<Matrix>& _weights, const std::vector<Matrix>& _biases) {
+Network::Network(const std::vector<Matrix>& _weights, const std::vector<Matrix>& _biases, const Cost* _cost) {
   this->weights = _weights;
   this->biases = _biases;
+  this->cost = _cost;
   this->num_layers = _weights.size();
+  this->cost = _cost;
 }
 
-Network::Network(const std::vector<std::size_t>& sizes) {
+Network::Network(const std::vector<std::size_t>& sizes, const Cost* _cost) {
   this->num_layers = sizes.size();
   this->sizes = sizes;
   this->biases = std::vector<Matrix>(sizes.size() - 1);
@@ -35,6 +37,7 @@ Network::Network(const std::vector<std::size_t>& sizes) {
     this->weights[left] = Matrix(sizes[left], sizes[size], gaussian_random_generator);
     this->biases[left] = Matrix(sizes[size], 1, gaussian_random_generator);
   }
+  this->cost = _cost;
 }
 
 const Matrix Network::feed_forward(const Matrix& input) const {
@@ -112,8 +115,7 @@ const std::pair<std::vector<Matrix>, std::vector<Matrix>> Network::backprop(cons
     activations.push_back(activation);
   }
 
-  Matrix delta = this->cost_derivative(activations[activations.size() - 1], label) \
-                 * zs[zs.size() - 1].sigmoid_prime();
+  Matrix delta = this->cost->delta(zs[zs.size() - 1], activations[activations.size() - 1], label);
   nabla_b[nabla_b.size() - 1] = delta;
   nabla_w[nabla_w.size() - 1] = activations[activations.size() - 2].product(delta.transpose());
   for (std::size_t l = 2; l < this->num_layers; l++) {
@@ -137,9 +139,5 @@ int Network::evaluate(const MnistData& data) const {
     }
   }
   return total;
-}
-
-const Matrix Network::cost_derivative(const Matrix& activation, const Matrix& label) const {
-  return activation - label;
 }
 
