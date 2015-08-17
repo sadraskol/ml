@@ -83,15 +83,11 @@ void Network::update_mini_batch(const std::vector<std::pair<Matrix, Matrix>>& mi
     std::vector<Matrix> delta_nabla_w = delta_nablas.second;
     for (std::size_t i = 0; i < nabla_b.size(); i++) {
       nabla_b[i] += delta_nabla_b[i];
-    }
-    for (std::size_t i = 0; i < nabla_w.size(); i++) {
       nabla_w[i] += delta_nabla_w[i];
     }
   }
   for (std::size_t i = 0; i < this->weights.size(); i++) {
     this->weights[i] += (-eta / mini_batch.size()) * nabla_w[i];
-  }
-  for (std::size_t i = 0; i < this->biases.size(); i++) {
     this->biases[i] += (-eta / mini_batch.size()) * nabla_b[i];
   }
 }

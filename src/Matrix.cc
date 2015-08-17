@@ -136,8 +136,8 @@ Matrix& Matrix::operator+=(const Matrix& other) {
 
 const Matrix Matrix::operator-() const {
   return this->transform([](const double &input) {
-      return -input;
-      });
+    return -input;
+  });
 }
 
 const Matrix Matrix::operator-(const Matrix& other) const {
