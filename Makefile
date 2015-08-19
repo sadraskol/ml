@@ -16,12 +16,13 @@ tests := $(patsubst %.cc,$(bin_dir)/%,$(tests_src))
 sources := $(notdir $(shell find $(src_dir) -type f -name "*.h"))
 objects := $(patsubst %.h,$(build_dir)/%.o,$(sources))
 
-all : $(bin_dir)/run
+all : $(bin_dir)/run $(tests)
 
 $(bin_dir)/run : main.cc $(objects)
 	$(CXX) $(cppflags) $(cxxflags) -lpthread $^ -o $@
 
 test : $(tests)
+	for test in $(tests); do bash -c $$test; done
 
 clean :
 	rm -f $(build_dir)/*
