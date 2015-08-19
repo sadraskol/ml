@@ -28,11 +28,11 @@ Network::Network(const std::vector<Matrix>& _weights, const std::vector<Matrix>&
 }
 
 Network::Network(const std::vector<std::size_t>& sizes, const Cost* _cost) {
-  this->num_layers = sizes.size();
+  this->num_layers = sizes.size() - 1;
   this->sizes = sizes;
   this->biases = std::vector<Matrix>(sizes.size() - 1);
   this->weights = std::vector<Matrix>(sizes.size() - 1);
-  for (std::size_t size = 1; size < sizes.size(); size++) {
+  for (unsigned int size = 1; size < sizes.size(); ++size) {
     const std::size_t left = size - 1;
     this->weights[left] = Matrix(sizes[left], sizes[size], gaussian_random_generator);
     this->biases[left] = Matrix(sizes[size], 1, gaussian_random_generator);
