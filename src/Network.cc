@@ -42,7 +42,7 @@ Network::Network(const std::vector<std::size_t>& sizes, const Cost* _cost) {
 
 const Matrix Network::feed_forward(const Matrix& input) const {
   Matrix output = input;
-  for (std::size_t index = 0; index < this->weights.size(); index++) {
+  for (unsigned int index = 0; index < this->weights.size(); ++index) {
     output = (this->weights[index].transpose().product(output) + this->biases[index]).sigmoid();
   }
   return output;
@@ -50,63 +50,63 @@ const Matrix Network::feed_forward(const Matrix& input) const {
 
 void Network::SGD(const MnistData& training_data, const std::size_t& epochs, const std::size_t& mini_batch_size, const double eta, const MnistData& test_data) {
   const std::size_t n = training_data.size();
-  for (std::size_t j = 0; j < epochs; j++) {
+  for (unsigned int j = 0; j < epochs; ++j) {
     std::clock_t start_epoch = std::clock();
     std::vector<std::pair<Matrix, Matrix>> randomized_data = training_data.randomize();
-    std::vector<std::vector<std::pair<Matrix, Matrix>>> mini_batches;
-    for (std::size_t k = 0; k < n; k += mini_batch_size) {
+    std::vector<std::vector<std::pair<Matrix, Matrix>>> mini_batches(mini_batch_size);
+    for (unsigned int k = 0; k < n; k += mini_batch_size) {
       std::vector<std::pair<Matrix, Matrix>> mini_batch;
-      for (std::size_t l = 0; l < mini_batch_size; l++) {
+      for (unsigned int l = 0; l < mini_batch_size; ++l) {
         mini_batch.push_back(randomized_data[k + l]);
       }
       mini_batches.push_back(mini_batch);
     }
-    for (std::size_t i = 0; i < mini_batches.size(); i++) {
+    for (unsigned int i = 0; i < mini_batch_size; ++i) {
       this->update_mini_batch(mini_batches[i], eta);
     }
     int evaluation = this->evaluate(test_data);
-    printf("Epoch %lu: %d / %lu (%li)\n", j, evaluation, test_data.size(), std::clock() - start_epoch);
+    printf("Epoch %u: %d / %lu (%li)\n", j, evaluation, test_data.size(), std::clock() - start_epoch);
   }
 }
 
 void Network::update_mini_batch(const std::vector<std::pair<Matrix, Matrix>>& mini_batch, const double eta) {
-  std::vector<Matrix> nabla_b(0), nabla_w(0);
-  for (auto bias: this->biases) {
-    nabla_b.push_back(Matrix::zeros(bias.getRows(), bias.getCols()));
+  std::vector<Matrix> nabla_b(this->num_layers);
+  std::vector<Matrix> nabla_w(this->num_layers);
+  for (unsigned int i = 0; i < this->num_layers; ++i) {
+    nabla_b[i] = Matrix::zeros(this->biases[i].getRows(), this->biases[i].getCols());
+    nabla_w[i] = Matrix::zeros(this->weights[i].getRows(), this->weights[i].getCols());
   }
-  for (auto weight: this->weights) {
-    nabla_w.push_back(Matrix::zeros(weight.getRows(), weight.getCols()));
-  }
+
   for (auto batch: mini_batch) {
     std::pair<std::vector<Matrix>, std::vector<Matrix>> delta_nablas = this->backprop(batch.first, batch.second);
     std::vector<Matrix> delta_nabla_b = delta_nablas.first;
     std::vector<Matrix> delta_nabla_w = delta_nablas.second;
-    for (std::size_t i = 0; i < nabla_b.size(); i++) {
+    for (unsigned int i = 0; i < this->num_layers; ++i) {
       nabla_b[i] += delta_nabla_b[i];
       nabla_w[i] += delta_nabla_w[i];
     }
   }
-  for (std::size_t i = 0; i < this->weights.size(); i++) {
+  for (unsigned int i = 0; i < this->num_layers; ++i) {
     this->weights[i] += (-eta / mini_batch.size()) * nabla_w[i];
     this->biases[i] += (-eta / mini_batch.size()) * nabla_b[i];
   }
 }
 
 const std::pair<std::vector<Matrix>, std::vector<Matrix>> Network::backprop(const Matrix& label, const Matrix& image) const {
-  std::vector<Matrix> nabla_b, nabla_w;
-  for (auto bias: this->biases) {
-    nabla_b.push_back(Matrix::zeros(bias.getRows(), bias.getCols()));
-  }
-  for (auto weight: this->weights) {
-    nabla_w.push_back(Matrix::zeros(weight.getRows(), weight.getCols()));
+  std::vector<Matrix> nabla_b(this->num_layers);
+  std::vector<Matrix> nabla_w(this->num_layers);
+  for (unsigned int i = 0; i < this->num_layers; ++i) {
+    nabla_b[i] = Matrix::zeros(this->biases[i].getRows(), this->biases[i].getCols());
+    nabla_w[i] = Matrix::zeros(this->weights[i].getRows(), this->weights[i].getCols());
   }
 
   Matrix activation = image;
   std::vector<Matrix> activations(1, activation);
-  std::vector<Matrix> zs(0);
-  for (std::size_t i = 0; i < this->weights.size(); i++) {
+  std::vector<Matrix> zs(this->num_layers);
+  zs.reserve(this->num_layers);
+  for (unsigned int i = 0; i < this->num_layers; ++i) {
     Matrix z = this->weights[i].transpose().product(activation) + this->biases[i];
-    zs.push_back(z);
+    zs[i] = z;
     activation = z.sigmoid();
     activations.push_back(activation);
   }
@@ -114,10 +114,8 @@ const std::pair<std::vector<Matrix>, std::vector<Matrix>> Network::backprop(cons
   Matrix delta = this->cost->delta(zs[zs.size() - 1], activations[activations.size() - 1], label);
   nabla_b[nabla_b.size() - 1] = delta;
   nabla_w[nabla_w.size() - 1] = activations[activations.size() - 2].product(delta.transpose());
-  for (std::size_t l = 2; l < this->num_layers; l++) {
-    Matrix z = zs[zs.size() - l];
-    Matrix spv = z.sigmoid_prime();
-    delta = this->weights[this->weights.size() + 1 - l].product(delta) * spv;
+  for (unsigned int l = 2; l < this->num_layers + 1; ++l) {
+    delta = this->weights[this->weights.size() + 1 - l].product(delta) * zs[zs.size() - l].sigmoid_prime();
     nabla_b[nabla_b.size() - l] = delta;
     nabla_w[nabla_w.size() - l] = activations[activations.size() - l - 1].product(delta.transpose());
   }
@@ -126,8 +124,8 @@ const std::pair<std::vector<Matrix>, std::vector<Matrix>> Network::backprop(cons
 
 int Network::evaluate(const MnistData& data) const {
   std::vector<std::pair<Matrix, Matrix>> test_data = data.randomize();
-  int total = 0;
-  for (std::size_t i = 0; i < test_data.size(); i++) {
+  unsigned int total = 0;
+  for (unsigned int i = 0; i < test_data.size(); ++i) {
     const std::size_t expected = test_data[i].first.argmax();
     const std::size_t actual = this->feed_forward(test_data[i].second).argmax();
     if (actual == expected) {
