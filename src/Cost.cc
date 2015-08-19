@@ -16,7 +16,7 @@ namespace neurons {
   double QuadraticCost::cost(const Matrix& a, const Matrix& y) const {
     std::vector<double> data = (a - y).getData();
     double accumulator = 0;
-    for (std::size_t i = 0; i < data.size(); i++) {
+    for (std::size_t i = 0; i < data.size(); ++i) {
       accumulator += data[i] * data[i];
     }
     return accumulator / 2;
@@ -30,7 +30,7 @@ namespace neurons {
     std::vector<double> a_data = a.getData();
     std::vector<double> y_data = y.getData();
     double accumulator = 0;
-    for (std::size_t i = 0; i < a_data.size(); i++) {
+    for (std::size_t i = 0; i < a_data.size(); ++i) {
       if (a_data[i] == 1 || a_data[i] == 0) {
         return 0;
       }

@@ -79,7 +79,7 @@ namespace neurons {
         char buffer[784];
         label_file.read(buffer, 784);
         std::vector<double> result(784);
-        for (int i = 0; i < 784; i++) {
+        for (int i = 0; i < 784; ++i) {
           result[i] = static_cast<double>(static_cast<unsigned char>(buffer[i])) / 255;
         }
         return result;
@@ -95,7 +95,7 @@ namespace neurons {
     public:
       MnistData(const std::size_t& lower_bound, const std::size_t& upped_bound): min(lower_bound), max(upped_bound) {
         this->data = std::vector<std::pair<Matrix, Matrix>>(this->size());
-        for (std::size_t i = 0; i < this->size(); i++) {
+        for (unsigned int i = 0; i < this->size(); ++i) {
           this->data[i] = std::make_pair(this->getLabel(i), this->getImage(i));
         }
       }

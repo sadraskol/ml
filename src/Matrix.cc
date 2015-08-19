@@ -34,8 +34,8 @@ Matrix::Matrix(const std::size_t& rows, const std::size_t& cols, const std::func
   this->rows = rows;
   this->cols = cols;
   this->data = std::vector<double>(rows * cols);
-  for (std::size_t i = 0; i < rows; i++) {
-    for (std::size_t j = 0; j < cols; j++) {
+  for (unsigned int i = 0; i < rows; ++i) {
+    for (unsigned int j = 0; j < cols; ++j) {
       this->data[i * cols + j] = filler();
     }
   }
@@ -43,8 +43,8 @@ Matrix::Matrix(const std::size_t& rows, const std::size_t& cols, const std::func
 
 const std::string Matrix::toString() const {
   std::string result("[");
-  for (std::size_t i = 0; i < rows; i++) {
-    for (std::size_t j = 0; j < cols; j++) {
+  for (unsigned int i = 0; i < rows; ++i) {
+    for (unsigned int j = 0; j < cols; ++j) {
       result += " ";
       result += std::to_string(get(i, j));
     }
@@ -59,8 +59,8 @@ const std::string Matrix::toString() const {
 const std::string Matrix::toPgm() const {
   std::ostringstream os;
   os << "P2\n" << this->rows << " " <<  this->cols << "\n255\n";
-  for (std::size_t i = 0; i < rows; i++) {
-    for (std::size_t j = 0; j < cols; j++) {
+  for (unsigned int i = 0; i < rows; ++i) {
+    for (unsigned int j = 0; j < cols; ++j) {
       os << std::to_string(static_cast<int>(get(i, j))) << " ";
     }
     os << "\n";
@@ -80,7 +80,7 @@ const Matrix Matrix::operator*(const Matrix& other) const {
     throw std::invalid_argument("matrix sizes do not match");
   }
   std::vector<double> new_data(this->rows * this->cols);
-  for (std::size_t i = 0; i < new_data.size(); i++) {
+  for (unsigned int i = 0; i < new_data.size(); ++i) {
     new_data[i] = this->data[i] * other.data[i];
   }
   return Matrix(this->rows, this->cols, new_data);
@@ -92,10 +92,10 @@ const Matrix Matrix::product(const Matrix& right) const {
     throw std::invalid_argument("size should match");
   }
   Matrix product(this->rows, right.cols, std::vector<double>(this->rows * right.cols));
-  for (std::size_t i = 0; i < this->rows; i++) {
-    for (std::size_t j = 0; j < right.cols; j++) {
+  for (unsigned int i = 0; i < this->rows; ++i) {
+    for (unsigned int j = 0; j < right.cols; ++j) {
       double accumulator = 0;
-      for (std::size_t k = 0; k < this->cols; k++) {
+      for (unsigned int k = 0; k < this->cols; ++k) {
         accumulator += get(i, k) * right.get(k, j);
       }
       product.set(i, j, accumulator);
@@ -117,7 +117,7 @@ const Matrix Matrix::operator+(const Matrix& other) const {
     throw std::invalid_argument("matrix sizes do not match");
   }
   std::vector<double> new_data(this->rows * this->cols);
-  for (std::size_t i = 0; i < new_data.size(); i++) {
+  for (unsigned int i = 0; i < new_data.size(); ++i) {
     new_data[i] = this->data[i] + other.data[i];
   }
   return Matrix(this->rows, this->cols, new_data);
@@ -128,7 +128,7 @@ Matrix& Matrix::operator+=(const Matrix& other) {
     printf("(%lu %lu) don't match (%lu %lu)", this->rows, this->cols, other.rows, other.cols);
     throw std::invalid_argument("matrix sizes do not match");
   }
-  for (std::size_t i = 0; i < this->data.size(); i++) {
+  for (unsigned int i = 0; i < this->data.size(); ++i) {
     this->data[i] += other.data[i];
   }
   return *this;
@@ -146,7 +146,7 @@ const Matrix Matrix::operator-(const Matrix& other) const {
     throw std::invalid_argument("matrix sizes do not match");
   }
   std::vector<double> new_data(this->rows * this->cols);
-  for (std::size_t i = 0; i < new_data.size(); i++) {
+  for (unsigned int i = 0; i < new_data.size(); ++i) {
     new_data[i] = this->data[i] - other.data[i];
   }
   return Matrix(this->rows, this->cols, new_data);
@@ -185,8 +185,8 @@ const Matrix Matrix::sigmoid_prime() const {
 
 const Matrix Matrix::transform(const std::function<double(double)>& transformer) const {
   std::vector<double> new_data(this->rows * this->cols);
-  for (std::size_t i = 0; i < this->rows; i++) {
-    for (std::size_t j = 0; j < this->cols; j++) {
+  for (unsigned int i = 0; i < this->rows; ++i) {
+    for (unsigned int j = 0; j < this->cols; ++j) {
       new_data[i * this->cols + j] = transformer(this->get(i, j));
     }
   }
@@ -195,27 +195,25 @@ const Matrix Matrix::transform(const std::function<double(double)>& transformer)
 
 const Matrix Matrix::transpose() const {
   std::vector<double> new_data(this->rows * this->cols);
-  for (std::size_t i = 0; i < this->rows; i++) {
-    for (std::size_t j = 0; j < this->cols; j++) {
+  for (unsigned int i = 0; i < this->rows; ++i) {
+    for (unsigned int j = 0; j < this->cols; ++j) {
       new_data[j * this->rows + i] = this->get(i, j);
     }
   }
   return Matrix(this->cols, this->rows, new_data);
 }
 
-static bool abs_compare(const double& a, const double& b) {
-  return std::abs(a) < std::abs(b);
-}
-
 std::size_t Matrix::argmax() const {
   const std::vector<double> v = this->getData();
   return std::distance(v.begin(),
-      std::max_element(v.begin(), v.end(), abs_compare));
+      std::max_element(v.begin(), v.end(), [](const double& a, const double& b) {
+        return std::abs(a) < std::abs(b);
+  }));
 }
 
 const Matrix Matrix::zeros(const std::size_t& rows, const std::size_t& cols) {
   std::vector<double> new_data(rows * cols);
-  for (std::size_t i = 0; i < rows * cols; i++) {
+  for (unsigned int i = 0; i < rows * cols; ++i) {
     new_data[i] = 0;
   }
   return Matrix(rows, cols, new_data);
