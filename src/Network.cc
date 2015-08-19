@@ -42,7 +42,7 @@ Network::Network(const std::vector<std::size_t>& sizes, const Cost* _cost) {
 
 const Matrix Network::feed_forward(const Matrix& input) const {
   Matrix output = input;
-  for (unsigned int index = 0; index < this->weights.size(); ++index) {
+  for (unsigned int index = 0; index < this->num_layers; ++index) {
     output = (this->weights[index].transpose().product(output) + this->biases[index]).sigmoid();
   }
   return output;
@@ -53,7 +53,7 @@ void Network::SGD(const MnistData& training_data, const std::size_t& epochs, con
   for (unsigned int j = 0; j < epochs; ++j) {
     std::clock_t start_epoch = std::clock();
     std::vector<std::pair<Matrix, Matrix>> randomized_data = training_data.randomize();
-    std::vector<std::vector<std::pair<Matrix, Matrix>>> mini_batches(mini_batch_size);
+    std::vector<std::vector<std::pair<Matrix, Matrix>>> mini_batches(0);
     for (unsigned int k = 0; k < n; k += mini_batch_size) {
       std::vector<std::pair<Matrix, Matrix>> mini_batch;
       for (unsigned int l = 0; l < mini_batch_size; ++l) {
@@ -61,7 +61,7 @@ void Network::SGD(const MnistData& training_data, const std::size_t& epochs, con
       }
       mini_batches.push_back(mini_batch);
     }
-    for (unsigned int i = 0; i < mini_batch_size; ++i) {
+    for (unsigned int i = 0; i < mini_batches.size(); ++i) {
       this->update_mini_batch(mini_batches[i], eta);
     }
     int evaluation = this->evaluate(test_data);
