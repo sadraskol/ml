@@ -11,7 +11,7 @@ test_dir=test
 
 tests_src := $(notdir $(shell find $(test_dir) -type f -name *_test.cc))
 tests_objects := $(patsubst %.cc,$(build_dir)/%.o,$(tests_src))
-tests := $(patsubst %.cc,$(bin_dir)/%,$(tests_src))
+tests := $(bin_dir)/test
 
 sources := $(notdir $(shell find $(src_dir) -type f -name "*.h"))
 objects := $(patsubst %.h,$(build_dir)/%.o,$(sources))
@@ -22,7 +22,7 @@ $(bin_dir)/run : main.cc $(objects)
 	$(CXX) $(cppflags) $(cxxflags) -lpthread $^ -o $@
 
 test : $(tests)
-	for test in $(tests); do bash -c $$test; done
+	./$(tests)
 
 clean :
 	rm -f $(build_dir)/*
@@ -33,7 +33,7 @@ $(build_dir)/%.o : $(src_dir)/%.cc $(src_dir)/%.h
 
 ## Tests ##
 ## Tests files ## 
-$(bin_dir)/%_test : $(objects) $(build_dir)/%_test.o $(build_dir)/gtest_main.a
+$(bin_dir)/test : $(tests_objects) $(objects) $(build_dir)/gtest_main.a
 	$(CXX) $(cppflags) $(cxxflags) -lpthread $^ -o $@
 
 ## GTest tasks ##
@@ -54,4 +54,3 @@ $(build_dir)/gtest_main.a : $(build_dir)/gtest-all.o $(build_dir)/gtest_main.o
 
 $(build_dir)/%_test.o : $(test_dir)/%_test.cc $(objects) $(gtest_headers)
 	$(CXX) $(cppflags) $(cxxflags) -c $< -o $@
-
