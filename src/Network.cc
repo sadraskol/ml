@@ -123,7 +123,7 @@ const std::pair<std::vector<Matrix>, std::vector<Matrix>> Network::backprop(cons
 }
 
 int Network::evaluate(const MnistData& data) const {
-  std::vector<std::pair<Matrix, Matrix>> test_data = data.randomize();
+  std::vector<std::pair<Matrix, Matrix>> test_data = data.get();
   unsigned int total = 0;
   for (unsigned int i = 0; i < test_data.size(); ++i) {
     const std::size_t expected = test_data[i].first.argmax();

@@ -114,6 +114,10 @@ namespace neurons {
         return this->max - this->min;
       }
 
+      const std::vector<std::pair<Matrix, Matrix>> get() const {
+        return this->data;
+      }
+
       const std::vector<std::pair<Matrix, Matrix>> randomize() const {
         std::vector<std::pair<Matrix, Matrix>> copy = this->data;
         std::random_shuffle(copy.begin(), copy.end());
