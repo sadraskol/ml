@@ -2,7 +2,7 @@ gtest_dir = deps/gtest-1.7.0
 cppflags = -isystem $(gtest_dir)/include
 cxxflags = -O3 -pthread -Wall -Wextra -std=c++11
 gtest_headers = $(gtest_dir)/include/gtest/*.h \
-				$(gtest_dir)/include/gtest/internal/*.h
+								$(gtest_dir)/include/gtest/internal/*.h
 
 build_dir=build
 bin_dir=bin
@@ -22,7 +22,7 @@ $(bin_dir)/run : main.cc $(objects)
 	$(CXX) $(cppflags) $(cxxflags) -lpthread $^ -o $@
 
 test : $(tests)
-	./$(tests)
+	./$(tests) --gtest_output xml
 
 clean :
 	rm -f $(build_dir)/*
@@ -40,11 +40,11 @@ $(bin_dir)/test : $(tests_objects) $(objects) $(build_dir)/gtest_main.a
 gtest_srcs_ = $(gtest_dir)/src/*.cc $(gtest_dir)/src/*.h $(gtest_headers)
 $(build_dir)/gtest-all.o : $(gtest_srcs_)
 	$(CXX) $(cppflags) -I$(gtest_dir) $(cxxflags) -c \
-           $(gtest_dir)/src/gtest-all.cc -o $@
+		$(gtest_dir)/src/gtest-all.cc -o $@
 
 $(build_dir)/gtest_main.o : $(gtest_srcs_)
 	$(CXX) $(cppflags) -I$(gtest_dir) $(cxxflags) -c \
-           $(gtest_dir)/src/gtest_main.cc -o $@
+		$(gtest_dir)/src/gtest_main.cc -o $@
 
 $(build_dir)/gtest.a : $(build_dir)/gtest-all.o
 	$(AR) $(ARFLAGS) $@ $^
