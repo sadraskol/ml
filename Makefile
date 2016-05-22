@@ -34,6 +34,7 @@ $(build_dir)/%.o : $(src_dir)/%.cc $(src_dir)/%.h
 ## Tests ##
 ## Tests files ## 
 $(bin_dir)/test : $(tests_objects) $(objects) $(build_dir)/gtest_main.a
+	mkdir -p bin
 	$(CXX) $(cppflags) $(cxxflags) -lpthread $^ -o $@
 
 ## GTest tasks ##
