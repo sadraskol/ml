@@ -11,4 +11,3 @@ TEST(NetworkTest, ShouldLearnDeterministiclyWithOneNeuron) {
   Matrix output = network.feed_forward(Matrix::create(1, 1, std::vector<double> { 1 }));
   EXPECT_NEAR(0.817574, output.getData()[0], 0.000001);
 }
-

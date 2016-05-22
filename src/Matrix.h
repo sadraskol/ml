@@ -82,4 +82,3 @@ namespace neurons {
 } // namespace neurons
 
 #endif /* MATRIX_H_ */
-

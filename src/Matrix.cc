@@ -157,8 +157,8 @@ const Matrix Matrix::operator/(const double& divisor) const {
     throw std::invalid_argument("can not divid by zero");
   }
   return this->transform([divisor](const double &input) {
-      return input / divisor;
-      });
+    return input / divisor;
+  });
 }
 
 void Matrix::set(const std::size_t& i, const std::size_t& j, const double& value) {

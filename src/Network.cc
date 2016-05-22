@@ -134,4 +134,3 @@ int Network::evaluate(const MnistData& data) const {
   }
   return total;
 }
-
