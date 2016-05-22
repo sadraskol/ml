@@ -1,5 +1,7 @@
 # Algebra
 
+[![Build Status](https://travis-ci.org/ThomasBracher/ml.svg?branch=master)](https://travis-ci.org/ThomasBracher/ml)
+
 Algebra is a personal learning project. The goals are to rediscover c++ with
 this [books](http://neuralnetworksanddeeplearning.com/chap1.html)'
 code reimplementation. It mostly contains experiments and unoptimized code,
